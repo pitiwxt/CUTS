@@ -21,3 +21,12 @@ service_account.json
 .vercel/
 **/service_account.json
 
+# Next.js build output (all sub-projects)
+**/.next/
+**/node_modules/
+
+# Env files (keep .env.example)
+**/.env
+**/.env.local
+**/.env*.local
+
