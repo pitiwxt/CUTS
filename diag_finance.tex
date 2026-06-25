@@ -1,0 +1,94 @@
+\documentclass[preview,margin=2pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\setmainfont[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK},
+  BoldItalicFont={TH SarabunPSK}
+]{TH SarabunPSK}
+\newfontfamily\chulafont{TH SarabunPSK}[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK}
+]
+
+\definecolor{chulapink}{HTML}{B81D67}
+\definecolor{darkblue}{HTML}{1A365D}
+\definecolor{charcoal}{HTML}{2D3748}
+\definecolor{linegreen}{HTML}{06C755}
+\definecolor{geminipurple}{HTML}{8E7CC3}
+\definecolor{googlesheets}{HTML}{0F9D58}
+
+\tikzset{
+  stepbox/.style={
+    rectangle, 
+    minimum width=3.2cm, 
+    minimum height=1.4cm, 
+    text centered, 
+    rounded corners=6pt, 
+    font=\chulafont\normalsize\bfseries, 
+    text width=3.0cm, 
+    line width=1.0pt
+  },
+  arrow/.style={
+    thick, 
+    ->, 
+    >=stealth, 
+    draw=charcoal!80,
+    line width=1.2pt
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}[node distance=1.0cm and 1.2cm, auto]
+  % Nodes
+  \node (S1) [stepbox, draw=linegreen, fill=linegreen!8] {
+    \color{linegreen!80!black} 1. ถ่ายรูปใบเสร็จ\\
+    \color{charcoal}\small สมาชิกส่งผ่าน LINE Bot\\
+    \color{charcoal}\footnotesize (ระบุ Campaign Tag)
+  };
+  
+  \node (S2) [stepbox, right=of S1, draw=geminipurple, fill=geminipurple!8] {
+    \color{geminipurple!80!black} 2. สแกนด้วย AI\\
+    \color{charcoal}\small Gemini 1.5 Flash\\
+    \color{charcoal}\footnotesize (สกัดข้อมูลเป็น JSON)
+  };
+  
+  \node (S3) [stepbox, right=of S2, draw=googlesheets, fill=googlesheets!8] {
+    \color{googlesheets!80!black} 3. บันทึกข้อมูลดิบ\\
+    \color{charcoal}\small Sheets \& Google Drive\\
+    \color{charcoal}\footnotesize (บันทึกและแยกไฟล์ภาพบิล)
+  };
+  
+  \node (S4) [stepbox, below=of S3, yshift=-0.5cm, draw=darkblue, fill=darkblue!8] {
+    \color{darkblue!80!black} 4. ตรวจสอบข้อมูล\\
+    \color{charcoal}\small ฝ่าย Finance ตรวจสอบ\\
+    \color{charcoal}\footnotesize (ตรวจและแก้ข้อมูลบน Sheets)
+  };
+  
+  \node (S5) [stepbox, left=of S4, xshift=-1.5cm, draw=chulapink, fill=chulapink!8] {
+    \color{chulapink!80!black} 5. สรุปรายงานการเงิน\\
+    \color{charcoal}\small Looker Studio Dashboard\\
+    \color{charcoal}\footnotesize (อัปเดตงบชมรมเรียลไทม์)
+  };
+
+  % Connections
+  \draw [arrow] (S1) -- (S2);
+  \draw [arrow] (S2) -- (S3);
+  \draw [arrow] (S3) -- (S4);
+  \draw [arrow] (S4) -- (S5);
+  
+  % Optional Discord notification path (dashed)
+  \node (Opt) [stepbox, draw=gray, fill=gray!5, dashed, below=of S2, yshift=-0.5cm] {
+    \color{gray!80!black} ทางเลือกเสริม (Option)\\
+    \color{charcoal}\small Discord Webhook\\
+    \color{charcoal}\footnotesize (กดยืนยันผ่านปุ่มในห้องแชต)
+  };
+  
+  \draw [arrow, dashed, draw=gray] (S3) |- (Opt);
+  \draw [arrow, dashed, draw=gray] (Opt) -- (S4);
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,57 @@
+\documentclass[preview,margin=2pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\setmainfont[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK},
+  BoldItalicFont={TH SarabunPSK}
+]{TH SarabunPSK}
+\newfontfamily\chulafont{TH SarabunPSK}[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK}
+]
+
+% Define colors for SWOT
+\definecolor{swots}{HTML}{B81D67} % Chula Pink for Strengths
+\definecolor{swotw}{HTML}{1A365D} % Dark Blue for Weaknesses
+\definecolor{swoto}{HTML}{2E7D32} % Dark Green for Opportunities
+\definecolor{swott}{HTML}{C62828} % Crimson Red for Threats
+
+\begin{document}
+\begin{tikzpicture}[node distance=0.2cm, auto]
+  \node (S) [draw=swots, fill=swots!5, rounded corners=6pt, text width=7.2cm, minimum height=3.6cm, inner sep=8pt, font=\chulafont\normalsize] {
+    \textbf{\color{swots}\Large Strengths (จุดแข็ง)}\\[0.2cm]
+    \textbullet\ เข้าถึงนิสิตกลุ่มเป้าหมาย (Tech \& Startup) โดยตรง\\
+    \textbullet\ ทีมการตลาดมีความคิดสร้างสรรค์และเข้าใจ Trend นิสิต\\
+    \textbullet\ ช่องทางสื่อสารครอบคลุมแพลตฟอร์มหลัก (IG, TikTok, FB)\\
+    \textbullet\ ภาพลักษณ์ของชมรมดึงดูดบุคลากรที่มีศักยภาพสูงได้ดี
+  };
+
+  \node (W) [right=of S, draw=swotw, fill=swotw!5, rounded corners=6pt, text width=7.2cm, minimum height=3.6cm, inner sep=8pt, font=\chulafont\normalsize] {
+    \textbf{\color{swotw}\Large Weaknesses (จุดอ่อน)}\\[0.2cm]
+    \textbullet\ บันทึกสถิติแบบคีย์มือ ล่าช้า 3--7 วัน เกิด Human Error ได้ง่าย\\
+    \textbullet\ ขาดระบบรวมศูนย์ข้อมูลเพื่อวิเคราะห์ประสิทธิภาพข้ามแพลตฟอร์ม\\
+    \textbullet\ ข้อมูลรายจ่ายการตลาดและสถิติการรับชมขาดการเชื่อมโยงเชิงลึก\\
+    \textbullet\ ติดข้อจำกัดการขออนุมัติสิทธิ์เข้าใช้งาน Official API ของชมรม
+  };
+
+  \node (O) [below=of S, draw=swoto, fill=swoto!5, rounded corners=6pt, text width=7.2cm, minimum height=3.6cm, inner sep=8pt, font=\chulafont\normalsize] {
+    \textbf{\color{swoto}\Large Opportunities (โอกาส)}\\[0.2cm]
+    \textbullet\ Low-code Workflow (n8n) ช่วยให้ทำระบบอัตโนมัติแบบโฮสต์เองได้\\
+    \textbullet\ Multimodal AI (Gemini) พัฒนาจนสามารถสกัดข้อมูลจากภาพได้แม่นยำ\\
+    \textbullet\ อัลกอริทึมวิดีโอสั้นช่วยให้แคมเปญสร้างกระแสไวรัลได้เร็วโดยใช้ทุนต่ำ\\
+    \textbullet\ มีระบบคลาวด์ฟรีเทียร์รองรับการพัฒนาซอฟต์แวร์โดยไม่มีค่าใช้จ่าย
+  };
+
+  \node (T) [right=of O, draw=swott, fill=swott!5, rounded corners=6pt, text width=7.2cm, minimum height=3.6cm, inner sep=8pt, font=\chulafont\normalsize] {
+    \textbf{\color{swott}\Large Threats (อุปสรรค)}\\[0.2cm]
+    \textbullet\ อัลกอริทึมของแพลตฟอร์มโซเชียลมีเดียหลักเปลี่ยนแปลงบ่อย\\
+    \textbullet\ นโยบายความเป็นส่วนตัวและสิทธิ์ API มีการตรวจสอบเข้มงวดมากขึ้น\\
+    \textbullet\ การแข่งขันแย่งชิงความสนใจ (Attention Economy) ในมหาวิทยาลัยสูง\\
+    \textbullet\ ระยะเวลาในการทำงานของทีมจำกัดเนื่องจากภารกิจการเรียนของนิสิต
+  };
+\end{tikzpicture}
+\end{document}

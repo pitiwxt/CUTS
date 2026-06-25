@@ -1,0 +1,89 @@
+\documentclass[preview,margin=2pt]{standalone}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
+
+\setmainfont[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK},
+  BoldItalicFont={TH SarabunPSK}
+]{TH SarabunPSK}
+\newfontfamily\chulafont{TH SarabunPSK}[
+  BoldFont={TH SarabunPSK},
+  ItalicFont={TH SarabunPSK}
+]
+
+% Custom color definitions matching the badges
+\definecolor{chulapink}{HTML}{B81D67}
+\definecolor{darkblue}{HTML}{1A365D}
+\definecolor{charcoal}{HTML}{2D3748}
+\definecolor{linegreen}{HTML}{06C755}
+\definecolor{geminipurple}{HTML}{8E7CC3}
+\definecolor{googlesheets}{HTML}{0F9D58}
+\definecolor{discordblue}{HTML}{5865F2}
+
+\tikzset{
+  layer/.style={
+    rectangle, 
+    minimum width=3.2cm, 
+    minimum height=1.3cm, 
+    text centered, 
+    rounded corners=6pt, 
+    font=\chulafont\normalsize\bfseries, 
+    text width=3.0cm, 
+    line width=1.0pt
+  },
+  arrow/.style={
+    thick, 
+    ->, 
+    >=stealth, 
+    draw=charcoal!80,
+    line width=1.2pt
+  }
+}
+
+\begin{document}
+\begin{tikzpicture}[node distance=1.0cm and 1.5cm, auto]
+  % Nodes Layout
+  \node (L1) [layer, draw=linegreen, fill=linegreen!8] {
+    \color{linegreen!80!black} เลเยอร์ 1: Capture\\
+    \color{charcoal}\small LINE Bot รับรูปใบเสร็จ\\
+    \color{charcoal}\footnotesize (ถ่ายรูปส่งบิลทันทีหลังจ่ายเงิน)
+  };
+  
+  \node (L2) [layer, right=of L1, draw=geminipurple, fill=geminipurple!8] {
+    \color{geminipurple!80!black} เลเยอร์ 2: Extraction\\
+    \color{charcoal}\small Gemini 1.5 Flash OCR\\
+    \color{charcoal}\footnotesize (สกัดข้อมูลร้านค้า/วันที่/ยอดเงิน)
+  };
+  
+  \node (L3) [layer, right=of L2, draw=googlesheets, fill=googlesheets!8] {
+    \color{googlesheets!80!black} เลเยอร์ 3: Storage\\
+    \color{charcoal}\small Sheets \& Google Drive\\
+    \color{charcoal}\footnotesize (จัดเก็บรูปภาพบิลแยกโฟลเดอร์)
+  };
+  
+  \node (L4) [layer, below=of L3, yshift=-0.5cm, draw=darkblue, fill=darkblue!8] {
+    \color{darkblue!80!black} เลเยอร์ 4: Verification\\
+    \color{charcoal}\small Finance Review on Sheets\\
+    \color{charcoal}\footnotesize (ตรวจสอบและแก้ไขข้อมูลบนชีต)
+  };
+  
+  \node (L5) [layer, left=of L4, xshift=-1.5cm, draw=chulapink, fill=chulapink!8] {
+    \color{chulapink!80!black} เลเยอร์ 5: Output\\
+    \color{charcoal}\small Looker Studio Dashboard\\
+    \color{charcoal}\footnotesize (สรุปรายรับ-รายจ่ายชมรม)
+  };
+
+  % Connections
+  \draw [arrow] (L1) -- (L2);
+  \draw [arrow] (L2) -- (L3);
+  \draw [arrow] (L3) -- (L4);
+  \draw [arrow] (L4) -- (L5);
+  \draw [arrow] (L5) |- ($(L1.west) - (0.4cm, 0)$) -- (L1.west);
+  
+  % Feedback loop label
+  \node at ($(L5.west) - (0.1cm, -1.0cm)$) [font=\chulafont\small\itshape, text=charcoal] {Feedback Loop};
+\end{tikzpicture}
+\end{document}
