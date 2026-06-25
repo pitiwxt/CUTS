@@ -15,3 +15,9 @@ Thumbs.db
 
 # Temporary page previews
 page-*.png
+
+# Credentials & Deployments
+service_account.json
+.vercel/
+**/service_account.json
+
