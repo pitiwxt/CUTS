@@ -126,7 +126,9 @@ export const INITIAL_TREND_DATA: TrendPoint[] = [
 
 export const SPREADSHEET_ID = "1mOrmQ8JgnCHgvzAtMWJrC2Mhj2jDCIT9J1sw0XRoqpc";
 export const SHEET_NAME = "Daily Stats";
-export const CSV_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+export const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`;
+// Use server-side proxy to avoid CORS on gviz/tq
+export const CSV_URL = "/api/sheets-proxy";
 
 // Helper to parse CSV (similar to local app.js parser)
 export function parseCSV(csvText: string): any[] {

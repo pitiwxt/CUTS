@@ -8,20 +8,23 @@ import PlatformDonut from '../components/PlatformDonut';
 import CampaignTable from '../components/CampaignTable';
 import PipelineFlow from '../components/PipelineFlow';
 import ChatInterface from '../components/ChatInterface';
-import { 
-  Post, 
-  Campaign, 
-  TrendPoint, 
-  fetchLiveSheetsData, 
-  INITIAL_POSTS, 
-  INITIAL_CAMPAIGNS, 
-  INITIAL_TREND_DATA 
+import OCRchatTab from '../components/OCRchatTab';
+import {
+  Post,
+  Campaign,
+  TrendPoint,
+  fetchLiveSheetsData,
+  INITIAL_POSTS,
+  INITIAL_CAMPAIGNS,
+  INITIAL_TREND_DATA,
+  SHEET_URL,
 } from '../lib/data';
 import { runPipelineSimulation, PipelineStep } from '../lib/pipeline';
-import { Bell, RefreshCw } from 'lucide-react';
+import { Bell, RefreshCw, ExternalLink } from 'lucide-react';
 
 export default function Home() {
   const [currentTab, setCurrentTab] = useState('overview');
+  const [module, setModule] = useState<'home' | 'zocial' | 'ocrchat'>('home');
   
   // Data states
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
@@ -67,19 +70,94 @@ export default function Home() {
     loadData();
   }, []);
 
-  // Run pipeline simulation
+  // Apify Tier 3 real scraper state
+  const [apifyHandles, setApifyHandles] = useState<Record<string, string>>({
+    instagram: '',
+    tiktok: '',
+    facebook: '',
+  });
+  const [apifyRunIds, setApifyRunIds] = useState<Record<string, { runId: string; datasetId: string }>>({});
+  const [apifyStatus, setApifyStatus] = useState<string>('');
+
+  // Trigger real Apify scraper for a platform
+  const runApifyScraper = async (platform: string, handles: string[]) => {
+    const res = await fetch('/api/apify-run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ platform, handles }),
+    });
+    const data = await res.json();
+    if (data.runId) {
+      setApifyRunIds(prev => ({ ...prev, [platform]: { runId: data.runId, datasetId: data.datasetId } }));
+    }
+    return data;
+  };
+
+  // Poll Apify run until done, merge results into posts
+  const pollApifyResult = async (platform: string, runId: string, datasetId: string) => {
+    const maxWait = 120; // 2 min
+    for (let i = 0; i < maxWait; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      const res = await fetch(`/api/apify-run?runId=${runId}&datasetId=${datasetId}&platform=${platform}`);
+      const data = await res.json();
+      setApifyStatus(`${platform}: ${data.status}`);
+      if (data.status === 'SUCCEEDED' && data.posts?.length > 0) {
+        setPosts(prev => {
+          const existingIds = new Set(prev.map(p => p.post_id));
+          const newPosts = data.posts.filter((p: Post) => !existingIds.has(p.post_id));
+          return [...newPosts, ...prev];
+        });
+        return data.posts;
+      }
+      if (data.status === 'FAILED' || data.status === 'ABORTED') break;
+    }
+    return [];
+  };
+
+  // Run pipeline — Tier 1 sim then Tier 3 real Apify
   const handleStartSimulation = async () => {
     setIsSimulating(true);
     setPipelineLogs([]);
-    
-    await runPipelineSimulation((steps, newLog) => {
-      setPipelineSteps(steps);
-      setPipelineLogs(prev => [...prev, newLog]);
-    });
-    
+
+    const platforms = ['instagram', 'tiktok', 'facebook']
+      .filter(p => apifyHandles[p].trim() !== '');
+
+    if (platforms.length > 0) {
+      // Real Apify run (Tier 3)
+      const nowStr = () => new Date().toLocaleTimeString();
+      setPipelineSteps(prev => prev.map(s =>
+        s.id === 'tier3' ? { ...s, status: 'running', message: 'Triggering Apify...' } : { ...s, status: 'skipped' }
+      ));
+      setPipelineLogs([`[${nowStr()}] [tier3] Triggering Apify scrapers for: ${platforms.join(', ')}`]);
+
+      for (const platform of platforms) {
+        const handles = apifyHandles[platform].split(',').map(h => h.trim()).filter(Boolean);
+        const run = await runApifyScraper(platform, handles);
+        if (run.runId) {
+          setPipelineLogs(prev => [...prev, `[${nowStr()}] [apify] ${platform} run started: ${run.runId}`]);
+          const posts = await pollApifyResult(platform, run.runId, run.datasetId);
+          setPipelineLogs(prev => [...prev,
+            posts.length > 0
+              ? `[${nowStr()}] [apify] ✅ ${platform}: ${posts.length} posts fetched`
+              : `[${nowStr()}] [apify] ⚠️ ${platform}: no posts returned`
+          ]);
+        } else {
+          setPipelineLogs(prev => [...prev, `[${nowStr()}] [apify] ❌ ${platform}: ${run.error}`]);
+        }
+      }
+      setPipelineSteps(prev => prev.map(s =>
+        s.id === 'tier3' ? { ...s, status: 'success', message: `Done (${platforms.join(', ')})` } : s
+      ));
+    } else {
+      // No handles set — run simulation only
+      await runPipelineSimulation((steps, newLog) => {
+        setPipelineSteps(steps);
+        setPipelineLogs(prev => [...prev, newLog]);
+      });
+    }
+
     setIsSimulating(false);
-    // After simulation, refresh data
-    await loadData();
+    setLastSynced(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   };
 
   // Compute stats
@@ -112,6 +190,8 @@ export default function Home() {
   });
 
   const getSectionTitle = () => {
+    if (module === 'home') return 'Club OS — ระบบจัดการ CUTS';
+    if (module === 'ocrchat') return 'OCRchat — Finance';
     switch (currentTab) {
       case 'overview': return 'Overview Dashboard';
       case 'performance': return 'Performance Trends';
@@ -125,7 +205,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen bg-[#0F1117] text-slate-100 font-sans antialiased">
       {/* Left Sidebar */}
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} module={module} setModule={setModule} />
 
       {/* Main Content Area */}
       <div className="flex-1 pl-64 flex flex-col">
@@ -140,7 +220,17 @@ export default function Home() {
               </span>
               <span>Last Synced: {lastSynced}</span>
             </span>
-            <button 
+            <a
+              href={SHEET_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a3a1a] hover:bg-[#1f4a1f] border border-green-700/50 text-green-400 text-xs font-medium transition-all"
+              title="Open Google Sheet"
+            >
+              <ExternalLink size={13} />
+              View Sheet
+            </a>
+            <button
               onClick={loadData}
               disabled={isLoadingData}
               className={`p-2 rounded-lg bg-[#252A37] hover:bg-[#2c3242] border border-[#2D3148] text-slate-300 transition-all ${
@@ -158,9 +248,53 @@ export default function Home() {
 
         {/* Content Body */}
         <main className="flex-grow p-8 space-y-6">
-          
-          {/* OVERVIEW TAB */}
-          {currentTab === 'overview' && (
+
+          {/* HOME MODULE SELECTOR */}
+          {module === 'home' && (
+            <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8">
+              <div className="text-center space-y-2">
+                <div className="flex items-center justify-center mb-4">
+                  <img
+                    src="/cuts-logo.png"
+                    alt="CUTS Logo"
+                    className="w-24 h-24 object-contain rounded-2xl shadow-lg shadow-pink-500/20"
+                    onError={e => { (e.target as HTMLImageElement).style.display='none'; }}
+                  />
+                </div>
+                <h1 className="text-4xl font-bold text-slate-100">Club OS</h1>
+                <p className="text-slate-400 text-base">ระบบจัดการ Marketing + Finance ของ CUTS</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+                <button
+                  onClick={() => { setModule('zocial'); setCurrentTab('overview'); }}
+                  className="group rounded-2xl p-8 text-left border border-[#2D3148] bg-[#1A1D27] hover:border-[#B81D67] hover:bg-[#1f1b2e] transition-all duration-200 shadow-lg hover:shadow-[#B81D67]/10"
+                >
+                  <div className="text-3xl mb-4">📊</div>
+                  <h2 className="text-xl font-bold text-slate-100 mb-1 group-hover:text-[#B81D67] transition-colors">Zocial Tracker</h2>
+                  <p className="text-sm text-slate-400">วิเคราะห์ Social Media · Pipeline · AI Assistant</p>
+                  <div className="mt-4 text-xs text-green-400 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span>
+                    Live Pipeline Online
+                  </div>
+                </button>
+                <button
+                  onClick={() => setModule('ocrchat')}
+                  className="group rounded-2xl p-8 text-left border border-[#2D3148] bg-[#1A1D27] hover:border-emerald-500 hover:bg-[#1a2420] transition-all duration-200 shadow-lg hover:shadow-emerald-500/10"
+                >
+                  <div className="text-3xl mb-4">🧾</div>
+                  <h2 className="text-xl font-bold text-slate-100 mb-1 group-hover:text-emerald-400 transition-colors">OCRchat</h2>
+                  <p className="text-sm text-slate-400">สแกนใบเสร็จด้วย AI · บันทึกรายจ่าย · Supabase + Sheets</p>
+                  <div className="mt-4 text-xs text-emerald-400 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+                    Gemini 1.5 Flash Ready
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ZOCIAL TRACKER TABS */}
+          {module === 'zocial' && currentTab === 'overview' && (
             <div className="space-y-6">
               {/* Row 1: KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -214,7 +348,7 @@ export default function Home() {
           )}
 
           {/* PERFORMANCE TAB */}
-          {currentTab === 'performance' && (
+          {module === 'zocial' && currentTab === 'performance' && (
             <div className="space-y-6">
               <div className="bg-[#1A1D27] border border-[#2D3148] p-6 rounded-xl">
                 <h3 className="text-md font-bold text-slate-100 mb-4">📈 Reach & Engagement Trends</h3>
@@ -254,17 +388,42 @@ export default function Home() {
           )}
 
           {/* PIPELINE TAB */}
-          {currentTab === 'pipeline' && (
-            <PipelineFlow 
-              steps={pipelineSteps} 
-              logs={pipelineLogs} 
-              onStartSimulation={handleStartSimulation} 
-              isSimulating={isSimulating}
-            />
+          {module === 'zocial' && currentTab === 'pipeline' && (
+            <div className="space-y-4">
+              {/* Apify Account Handles Config */}
+              <div className="bg-[#1A1D27] border border-[#2D3148] rounded-xl p-5">
+                <h3 className="text-sm font-bold text-slate-200 mb-1">⚡ Tier 3 — Apify Live Scraper</h3>
+                <p className="text-xs text-slate-400 mb-4">ใส่ username ของแต่ละ platform แล้วกด Run Pipeline เพื่อดึงข้อมูลจริง (ว่างไว้ = รัน simulation เท่านั้น)</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(['instagram', 'tiktok', 'facebook'] as const).map(platform => (
+                    <div key={platform}>
+                      <label className="block text-xs text-slate-400 mb-1 capitalize">{platform} username</label>
+                      <input
+                        type="text"
+                        value={apifyHandles[platform]}
+                        onChange={e => setApifyHandles(prev => ({ ...prev, [platform]: e.target.value }))}
+                        placeholder={platform === 'instagram' ? 'e.g. chulatechstartup' : platform === 'tiktok' ? 'e.g. cts_official' : 'e.g. ChulaTS'}
+                        className="w-full bg-[#252A37] border border-[#2D3148] rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#B81D67]"
+                      />
+                    </div>
+                  ))}
+                </div>
+                {apifyStatus && (
+                  <p className="text-xs text-yellow-400 mt-3">🔄 {apifyStatus}</p>
+                )}
+              </div>
+
+              <PipelineFlow
+                steps={pipelineSteps}
+                logs={pipelineLogs}
+                onStartSimulation={handleStartSimulation}
+                isSimulating={isSimulating}
+              />
+            </div>
           )}
 
           {/* DATA TABLE TAB */}
-          {currentTab === 'data' && (
+          {module === 'zocial' && currentTab === 'data' && (
             <div className="bg-[#1A1D27] border border-[#2D3148] rounded-xl p-6 space-y-6">
               {/* Filters Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -367,8 +526,12 @@ export default function Home() {
           )}
 
           {/* AI ASSISTANT TAB */}
-          {currentTab === 'chat' && (
+          {module === 'zocial' && currentTab === 'chat' && (
             <ChatInterface />
+          )}
+
+          {module === 'ocrchat' && (
+            <OCRchatTab />
           )}
 
         </main>
