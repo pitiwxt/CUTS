@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zocial Tracker - Chula Tech Startup 2026 Prototype</title>
+    <!-- Google Fonts: Inter & Sarabun for professional Thai/English display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for sleek dashboard charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <span class="badge-club">CHULA TECH STARTUP 2026</span>
+                <h1>Zocial Tracker <span class="version-tag">Prototype v1.0</span></h1>
+                <p class="subtitle">ระบบดึงข้อมูล วิเคราะห์ และแสดงผลคอนเทนต์อัตโนมัติ (ฝ่าย Marketing)</p>
+            </div>
+            <div class="header-right">
+                <div class="developer-info">
+                    <span class="label">ผู้จัดทำ:</span>
+                    <span class="value">นายพิธิวัฒน์ ฉิมพลี (โฟร์) ปี 2</span>
+                    <span class="role">ฝ่าย Innovation</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Grid Layout -->
+        <main class="app-grid">
+            <!-- Sidebar / Control Panel -->
+            <section class="sidebar-card card">
+                <div class="card-header">
+                    <h2>⚙️ Control Panel</h2>
+                    <p>จำลองระบบสับเปลี่ยนช่องทางดึงข้อมูลกรณีติดขัด (Fallback Pipeline)</p>
+                </div>
+                
+                <div class="pipeline-flow">
+                    <div class="step-node active" id="step-api">
+                        <div class="node-icon">1</div>
+                        <div class="node-text">
+                            <h3>API (วิธีหลัก)</h3>
+                            <span class="tech-tag tag-meta">Meta API</span>
+                            <span class="tech-tag tag-tiktok">TikTok API</span>
+                        </div>
+                        <div class="node-status status-success" id="status-api">Ready</div>
+                    </div>
+                    
+                    <div class="flow-line" id="line-1"></div>
+                    
+                    <div class="step-node" id="step-vision">
+                        <div class="node-icon">2a</div>
+                        <div class="node-text">
+                            <h3>Playwright + AI Vision</h3>
+                            <span class="tech-tag tag-playwright">Playwright</span>
+                            <span class="tech-tag tag-gemini">Gemini Vision</span>
+                        </div>
+                        <div class="node-status status-pending" id="status-vision">Standby</div>
+                    </div>
+                    
+                    <div class="flow-line" id="line-2"></div>
+
+                    <div class="step-node" id="step-mcp">
+                        <div class="node-icon">2b</div>
+                        <div class="node-text">
+                            <h3>AI Agent (MCP Browser)</h3>
+                            <span class="tech-tag tag-discord">MCP Protocol</span>
+                        </div>
+                        <div class="node-status status-pending" id="status-mcp">Standby</div>
+                    </div>
+                    
+                    <div class="flow-line" id="line-3"></div>
+                    
+                    <div class="step-node" id="step-apify">
+                        <div class="node-icon">3</div>
+                        <div class="node-text">
+                            <h3>Apify Scrapers (วิธีสุดท้าย)</h3>
+                            <span class="tech-tag tag-apify">Apify Bot</span>
+                        </div>
+                        <div class="node-status status-pending" id="status-apify">Standby</div>
+                    </div>
+                </div>
+
+                <div class="action-zone">
+                    <button class="btn btn-primary" id="btn-run-simulation">⚡ เริ่มจำลองการดึงสถิติประจำวัน</button>
+                    <button class="btn btn-secondary" id="btn-reset-simulation">🔄 รีเซ็ตค่าการจำลอง</button>
+                </div>
+
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="title">n8n Execution Log</span>
+                    </div>
+                    <div class="terminal-body" id="terminal-log">
+                        <span class="log-line text-muted">[system] Ready to run daily workflow at 02:00 AM...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Analytics Panel -->
+            <section class="dashboard-panel">
+                <!-- Overview Stats Row -->
+                <div class="stats-row">
+                    <div class="stat-card card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Total Reach รวม</span>
+                            <h3 id="stat-total-reach">33,300</h3>
+                            <span class="stat-trend trend-up">📈 +12% vs สัปดาห์ก่อน</span>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Total Engage รวม</span>
+                            <h3 id="stat-total-engage">5,395</h3>
+                            <span class="stat-trend trend-up">📈 +18% vs สัปดาห์ก่อน</span>
+                        </div>
+                    </div>
+                    <div class="stat-card card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <span class="stat-label">Avg. Engagement Rate</span>
+                            <h3 id="stat-avg-er">16.20%</h3>
+                            <span class="stat-trend">✨ สูงกว่าเกณฑ์เฉลี่ย (5%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts & Formulas Grid -->
+                <div class="visuals-grid">
+                    <!-- Chart Card -->
+                    <div class="chart-card card">
+                        <div class="card-header">
+                            <h2>📊 Reach & Engage by Post</h2>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Formulas / KPI Cards -->
+                    <div class="kpi-formulas-card card">
+                        <div class="card-header">
+                            <h2>🧮 สูตรวิเคราะห์ผลลัพธ์อัตโนมัติ</h2>
+                            <p>ดึงค่าสถิติจากโมดูลมาคำนวณดัชนีชี้วัดเพื่อประเมินความสำเร็จ</p>
+                        </div>
+                        <div class="formulas-list">
+                            <div class="formula-item">
+                                <div class="formula-title">
+                                    <strong>Engagement Rate (ER)</strong>
+                                    <span class="formula-math">ER = (Engagements / Reach) * 100</span>
+                                </div>
+                                <p class="formula-desc">วัดคุณภาพความน่าสนใจของโพสต์เทียบกับจำนวนผู้ชมจริง (ใช้วัดคุณภาพเนื้อหา)</p>
+                            </div>
+                            <div class="formula-item">
+                                <div class="formula-title">
+                                    <strong>Virality Score (VS)</strong>
+                                    <span class="formula-math">VS = (Shares / Reach) * 100</span>
+                                </div>
+                                <p class="formula-desc">วัดอัตราการแชร์ต่อยอดวิว แสดงถึงพลังการแพร่กระจายและคุณประโยชน์ใช้งานจริง</p>
+                            </div>
+                            <div class="formula-item">
+                                <div class="formula-title">
+                                    <strong>Cost per Engage (CPE)</strong>
+                                    <span class="formula-math">CPE = Spend / Total Engagements</span>
+                                </div>
+                                <p class="formula-desc">ใช้ประเมินความคุ้มค่าของการลงทุนแคมเปญการตลาดข้ามแผนกร่วมกับแผนก Finance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table Card -->
+                <div class="table-card card">
+                    <div class="card-header-flex">
+                        <div>
+                            <h2>📋 คลังข้อมูลดิบ (Operational & Analytics Sync)</h2>
+                            <p>จำลองข้อมูลที่ซิงก์จาก Google Sheets ลง Supabase PostgreSQL</p>
+                        </div>
+                        <div class="filter-actions">
+                            <select id="filter-campaign" class="form-select">
+                                <option value="all">ทุกแคมเปญ</option>
+                                <option value="Recruiter-2026">Recruiter-2026</option>
+                                <option value="Workshop-AI">Workshop-AI</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table" id="posts-table">
+                            <thead>
+                                <tr>
+                                    <th>Post ID</th>
+                                    <th>Platform</th>
+                                    <th>Content Type</th>
+                                    <th>Reach</th>
+                                    <th>Engage</th>
+                                    <th>ER (%)</th>
+                                    <th>VS (%)</th>
+                                    <th>Data Source</th>
+                                    <th>Campaign Tag</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- JavaScript will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chatbot / AI Query Console -->
+            <section class="chatbot-card card">
+                <div class="card-header">
+                    <h2>🤖 LINE/Discord Bot Simulator</h2>
+                    <p>จำลองการแชทถามตอบดึงข้อมูลและการเงินข้ามแผนกแบบเรียลไทม์</p>
+                </div>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-message bot">
+                            <div class="avatar">AI</div>
+                            <div class="message-content">
+                                <p>สวัสดีครับ! ผมคือบอทสรุปผลของชมรม Chula Tech Startup 2026 คุณสามารถพิมพ์ถามคำถามเพื่อเรียกดูรายงานและวิเคราะห์ข้ามฝ่ายได้เลยครับ เช่น</p>
+                                <ul>
+                                    <li>"สรุปแคมเปญ Recruiter-2026 ให้หน่อย"</li>
+                                    <li>"วิเคราะห์แคมเปญที่คุ้มค่าเงินที่สุด"</li>
+                                    <li>"สูตร CPE คำนวณอย่างไร"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preset-questions">
+                        <button class="preset-btn" data-query="สรุปแคมเปญ Recruiter-2026 ให้หน่อย">📊 สรุป Recruiter-2026</button>
+                        <button class="preset-btn" data-query="วิเคราะห์แคมเปญที่คุ้มค่าเงินที่สุด">💰 แคมเปญไหนคุ้มที่สุด?</button>
+                        <button class="preset-btn" data-query="แสดงความเห็นจากข้อมูลแคมเปญ Workshop-AI">🧠 วิเคราะห์แคมเปญ Workshop-AI</button>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <input type="text" id="chat-input" placeholder="พิมพ์คำถามของคุณที่นี่..." autocomplete="off">
+                        <button id="btn-send-chat" class="btn btn-chat">ส่ง</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
