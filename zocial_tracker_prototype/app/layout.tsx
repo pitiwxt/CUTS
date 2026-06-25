@@ -26,10 +26,9 @@ export default function RootLayout({
     <html
       lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      style={{ background: "#0F1117" }}
+      style={{ background: "#F8FAFC" }}
     >
-      {/* background set inline so SSR and client match — no white flash */}
-      <body className="min-h-full flex flex-col bg-[#0F1117]">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-50">{children}</body>
     </html>
   );
 }

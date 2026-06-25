@@ -18,27 +18,27 @@ const zocialItems = [
 
 export default function Sidebar({ currentTab, setCurrentTab, module, setModule }: SidebarProps) {
   return (
-    <aside className="w-64 bg-[#1A1D27] border-r border-[#2D3148] flex flex-col fixed h-full z-10">
+    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col fixed h-full z-10 shadow-sm">
       {/* Header */}
-      <div className="p-5 border-b border-[#2D3148]">
+      <div className="p-5 border-b border-slate-200">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2.5 h-2.5 bg-pink-600 rounded-full animate-pulse"></div>
-          <span className="text-[10px] font-semibold text-[#B81D67] uppercase tracking-wider">Chula Tech Startup</span>
+          <span className="text-[10px] font-semibold text-pink-700 uppercase tracking-wider">Chula Tech Startup</span>
         </div>
         <button
           onClick={() => setModule('home')}
           className="flex items-center gap-2 group"
         >
           <img src="/cuts-logo.png" alt="CUTS" className="w-7 h-7 rounded-md object-contain" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
-          <h1 className="text-lg font-bold text-slate-100 group-hover:text-[#B81D67] transition-colors">
+          <h1 className="text-lg font-bold text-slate-800 group-hover:text-pink-600 transition-colors">
             Club OS
           </h1>
-          <span className="text-[9px] bg-[#2D3148] text-slate-400 px-1.5 py-0.5 rounded font-mono">v2.0</span>
+          <span className="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">v2.0</span>
         </button>
         {module !== 'home' && (
           <button
             onClick={() => setModule('home')}
-            className="mt-2 flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            className="mt-2 flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             <ChevronLeft size={12} />
             <span>เปลี่ยน Module</span>
@@ -49,25 +49,25 @@ export default function Sidebar({ currentTab, setCurrentTab, module, setModule }
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {module === 'home' && (
           <>
-            <p className="text-[10px] uppercase tracking-wider text-slate-600 px-3 mb-2">Select Module</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-400 px-3 mb-2">Select Module</p>
             <button
               onClick={() => { setModule('zocial'); setCurrentTab('overview'); }}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#252A37] hover:text-white transition-all group"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all group"
             >
               <TrendingUp size={18} className="text-pink-500" />
               <div className="text-left">
                 <div>Zocial Tracker</div>
-                <div className="text-[10px] text-slate-500 font-normal">Social Media Analytics</div>
+                <div className="text-[10px] text-slate-400 font-normal">Social Media Analytics</div>
               </div>
             </button>
             <button
               onClick={() => setModule('ocrchat')}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-[#252A37] hover:text-white transition-all"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all"
             >
               <Receipt size={18} className="text-emerald-500" />
               <div className="text-left">
                 <div>OCRchat</div>
-                <div className="text-[10px] text-slate-500 font-normal">Finance & Receipts</div>
+                <div className="text-[10px] text-slate-400 font-normal">Finance & Receipts</div>
               </div>
             </button>
           </>
@@ -75,7 +75,7 @@ export default function Sidebar({ currentTab, setCurrentTab, module, setModule }
 
         {module === 'zocial' && (
           <>
-            <p className="text-[10px] uppercase tracking-wider text-slate-600 px-3 mb-2">Zocial Tracker</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-400 px-3 mb-2">Zocial Tracker</p>
             {zocialItems.map(item => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
@@ -85,8 +85,8 @@ export default function Sidebar({ currentTab, setCurrentTab, module, setModule }
                   onClick={() => setCurrentTab(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive
-                      ? 'bg-[#B81D67] text-white shadow-lg shadow-[#B81D67]/15'
-                      : 'text-slate-400 hover:bg-[#252A37] hover:text-slate-100'
+                      ? 'bg-pink-600 text-white shadow-md shadow-pink-600/20'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <Icon size={17} />
@@ -99,10 +99,10 @@ export default function Sidebar({ currentTab, setCurrentTab, module, setModule }
 
         {module === 'ocrchat' && (
           <>
-            <p className="text-[10px] uppercase tracking-wider text-slate-600 px-3 mb-2">OCRchat — Finance</p>
+            <p className="text-[10px] uppercase tracking-wider text-slate-400 px-3 mb-2">OCRchat — Finance</p>
             <button
               onClick={() => setModule('ocrchat')}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium bg-emerald-700 text-white shadow-lg"
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white shadow-md"
             >
               <Receipt size={17} />
               <span>อัปโหลดใบเสร็จ</span>
@@ -111,10 +111,10 @@ export default function Sidebar({ currentTab, setCurrentTab, module, setModule }
         )}
       </nav>
 
-      <div className="p-4 border-t border-[#2D3148] bg-[#141722] text-xs text-slate-500 space-y-1">
-        <span className="block font-medium text-slate-400">นายพิธิวัฒน์ ฉิมพลี (โฟร์) ปี 2</span>
+      <div className="p-4 border-t border-slate-200 bg-slate-50 text-xs text-slate-500 space-y-1">
+        <span className="block font-medium text-slate-600">นายพิธิวัฒน์ ฉิมพลี (โฟร์) ปี 2</span>
         <span className="block text-pink-600 font-semibold">ฝ่าย Innovation</span>
-        <div className="pt-1 border-t border-[#2D3148] flex justify-between text-[10px]">
+        <div className="pt-1 border-t border-slate-200 flex justify-between text-[10px]">
           <span>© CUTS 2026</span>
           <span>Club OS v2.0</span>
         </div>
