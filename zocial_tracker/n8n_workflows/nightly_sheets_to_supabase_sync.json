@@ -1,0 +1,133 @@
+{
+  "name": "Nightly_Sheets_to_Supabase_Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116301",
+      "name": "Schedule Trigger (23:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$env.GOOGLE_SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": "Daily Stats",
+        "options": {}
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116302",
+      "name": "Google Sheets: Read All Rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\n// Format and filter rows with valid content\nconst validRows = rows\n  .filter(r => r.json.post_id && r.json.recorded_at)\n  .map(r => ({\n    post_id: r.json.post_id,\n    platform: r.json.platform || 'unknown',\n    content_type: r.json.content_type || 'unknown',\n    campaign_tag: r.json.campaign_tag || '',\n    reach: parseInt(r.json.reach) || 0,\n    impressions: parseInt(r.json.impressions) || 0,\n    likes: parseInt(r.json.likes) || 0,\n    comments: parseInt(r.json.comments) || 0,\n    shares: parseInt(r.json.shares) || 0,\n    saves: parseInt(r.json.saves) || 0,\n    engagement_rate: parseFloat(r.json.engagement_rate) || 0,\n    virality_score: parseFloat(r.json.virality_score) || 0,\n    data_source: r.json.data_source || 'manual',\n    recorded_at: r.json.recorded_at\n  }));\n\nreturn [{ json: { rows: validRows } }];"
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116303",
+      "name": "Code Node: Format Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/post_stats",
+        "sendHeaders": true,
+        "headers": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_SERVICE_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.SUPABASE_SERVICE_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "rows",
+              "value": "={{$json.rows}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116304",
+      "name": "Supabase: Batch Upsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger (23:00)": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Read All Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Read All Rows": {
+      "main": [
+        [
+          {
+            "node": "Code Node: Format Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Node: Format Batch": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Batch Upsert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "f784e1b5-6f91-45bd-8c43-16a7353fbc4b",
+  "id": "2",
+  "meta": {
+    "templateId": "zocial-tracker-sheets-sync"
+  }
+}

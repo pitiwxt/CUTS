@@ -1,0 +1,14 @@
+# Local Environment Configuration
+.env
+
+# Dependencies
+node_modules/
+
+# Local databases
+*.db
+
+# Temporary screenshots from vision scraper
+screenshot_*.png
+
+# OS-specific files
+.DS_Store

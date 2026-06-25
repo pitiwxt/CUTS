@@ -1,0 +1,237 @@
+{
+  "name": "Daily_Meta_Stats_Pull",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 2 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a2b6e792-3bc5-4422-9011-e374bbff1401",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v19.0/{{$env.IG_BUSINESS_ACCOUNT_ID}}/media",
+        "sendQueryParameters": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "id,media_type,timestamp,like_count,comments_count,reach,impressions,saved,shares"
+            },
+            {
+              "name": "since",
+              "value": "={{$now.minus({days: 1}).startOf('day').toISO()}}"
+            },
+            {
+              "name": "until",
+              "value": "={{$now.startOf('day').toISO()}}"
+            },
+            {
+              "name": "access_token",
+              "value": "={{$env.META_ACCESS_TOKEN}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116298",
+      "name": "HTTP Request: Meta Graph API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json.data || [];\n  \n  for (const post of data) {\n    const likes = post.like_count || 0;\n    const comments = post.comments_count || 0;\n    const shares = post.shares?.count || 0;\n    const saves = post.saved || 0;\n    const reach = post.reach || 1; // Avoid division by zero\n    \n    const engagementRate = ((likes + comments + shares + saves) / reach * 100).toFixed(2);\n    const viralityScore = (shares / reach * 100).toFixed(2);\n    \n    results.push({\n      json: {\n        post_id: `IG_${post.id.slice(-4)}`,\n        platform: 'instagram',\n        content_type: post.media_type?.toLowerCase() || 'unknown',\n        campaign_tag: '', // Fill manually in Sheets or parse from caption\n        reach: reach,\n        impressions: post.impressions || 0,\n        likes: likes,\n        comments: comments,\n        shares: shares,\n        saves: saves,\n        engagement_rate: parseFloat(engagementRate),\n        virality_score: parseFloat(viralityScore),\n        data_source: 'api',\n        recorded_at: new Date().toISOString().split('T')[0]\n      }\n    });\n  }\n}\n\nreturn results;"
+      },
+      "id": "a0f3d611-d102-45bb-b293-11116209b555",
+      "name": "Code Node: Calculate Metrics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{$env.GOOGLE_SHEET_ID}}",
+          "mode": "id"
+        },
+        "sheetName": "Daily Stats",
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "post_id": "={{$json.post_id}}",
+            "platform": "={{$json.platform}}",
+            "content_type": "={{$json.content_type}}",
+            "campaign_tag": "={{$json.campaign_tag}}",
+            "reach": "={{$json.reach}}",
+            "impressions": "={{$json.impressions}}",
+            "likes": "={{$json.likes}}",
+            "comments": "={{$json.comments}}",
+            "shares": "={{$json.shares}}",
+            "saves": "={{$json.saves}}",
+            "data_source": "={{$json.data_source}}",
+            "recorded_at": "={{$json.recorded_at}}"
+          }
+        },
+        "options": {}
+      },
+      "id": "8f3cf542-a890-4bf6-9023-e22ff1116298",
+      "name": "Google Sheets: Append/Update",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/post_stats",
+        "sendHeaders": true,
+        "headers": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{$env.SUPABASE_SERVICE_KEY}}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$env.SUPABASE_SERVICE_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "post_id",
+              "value": "={{$json.post_id}}"
+            },
+            {
+              "name": "platform",
+              "value": "={{$json.platform}}"
+            },
+            {
+              "name": "content_type",
+              "value": "={{$json.content_type}}"
+            },
+            {
+              "name": "reach",
+              "value": "={{$json.reach}}"
+            },
+            {
+              "name": "likes",
+              "value": "={{$json.likes}}"
+            },
+            {
+              "name": "comments",
+              "value": "={{$json.comments}}"
+            },
+            {
+              "name": "shares",
+              "value": "={{$json.shares}}"
+            },
+            {
+              "name": "saves",
+              "value": "={{$json.saves}}"
+            },
+            {
+              "name": "engagement_rate",
+              "value": "={{$json.engagement_rate}}"
+            },
+            {
+              "name": "virality_score",
+              "value": "={{$json.virality_score}}"
+            },
+            {
+              "name": "data_source",
+              "value": "={{$json.data_source}}"
+            },
+            {
+              "name": "recorded_at",
+              "value": "={{$json.recorded_at}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e43cf542-a890-4bf6-9023-e22ff1116299",
+      "name": "Supabase: Batch Upsert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request: Meta Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request: Meta Graph API": {
+      "main": [
+        [
+          {
+            "node": "Code Node: Calculate Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code Node: Calculate Metrics": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets: Append/Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets: Append/Update": {
+      "main": [
+        [
+          {
+            "node": "Supabase: Batch Upsert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "f784e1b5-6f91-45bd-8c43-16a7353fbc4a",
+  "id": "1",
+  "meta": {
+    "templateId": "zocial-tracker-daily-meta"
+  }
+}
