@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
@@ -20,7 +21,14 @@ function getSupabaseClient() {
   }
 
   try {
-    return createClient(url, serviceKey);
+    return createClient(url, serviceKey, {
+      auth: {
+        persistSession: false
+      },
+      realtime: {
+        transport: WebSocket
+      }
+    });
   } catch (error) {
     console.error("❌ Supabase client initialization failed:", error.message);
     return null;

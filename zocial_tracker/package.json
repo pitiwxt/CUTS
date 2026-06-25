@@ -4,16 +4,19 @@
   "description": "Production Marketing Pipeline for Chula Tech Startup 2026",
   "main": "orchestrator.js",
   "scripts": {
-    "start": "node orchestrator.js",
-    "test": "node orchestrator.js --dry-run"
+    "start": "node live_scraper_apify.js",
+    "test": "node orchestrator.js --dry-run",
+    "scrape:apify": "node live_scraper_apify.js",
+    "scrape:vision": "node live_scraper_noapi.js"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.2.1",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.39.8",
     "dotenv": "^16.4.5",
     "googleapis": "^134.0.0",
     "playwright": "^1.42.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "ws": "^8.21.0"
   },
   "author": "Pitiwat Chimplee",
   "license": "ISC"

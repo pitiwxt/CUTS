@@ -10,19 +10,23 @@ const KEY_FILE_PATH = path.join(__dirname, 'service_account.json');
  * Initializes and authenticates the Google Sheets API client
  */
 function getSheetsClient() {
-  if (!fs.existsSync(KEY_FILE_PATH)) {
-    console.log("⚠️ service_account.json credentials file not found. Google Sheets operations will run in MOCK mode.");
-    return null;
-  }
-
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: KEY_FILE_PATH,
+    let authOptions = {
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
+    };
+
+    if (fs.existsSync(KEY_FILE_PATH)) {
+      console.log("🔑 Using service_account.json for Google Sheets authentication.");
+      authOptions.keyFile = KEY_FILE_PATH;
+    } else {
+      console.log("🔑 service_account.json not found. Attempting Application Default Credentials (ADC)...");
+    }
+
+    const auth = new google.auth.GoogleAuth(authOptions);
     return google.sheets({ version: 'v4', auth });
   } catch (error) {
     console.error("❌ Google Sheets auth initialization failed:", error.message);
+    console.log("⚠️ Sheets client running in MOCK mode due to auth failure.");
     return null;
   }
 }
@@ -47,12 +51,52 @@ async function syncToGoogleSheets(rowsData) {
     const range = 'Daily Stats!A:L'; // Tab name and column span
     
     // 1. Read existing rows to determine if we should append or update
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: range,
-    });
-    
-    const existingRows = response.data.values || [];
+    let existingRows = [];
+    try {
+      const response = await sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: range,
+      });
+      existingRows = response.data.values || [];
+    } catch (readError) {
+      if (readError.message.includes('Unable to parse range') || readError.message.includes('NOT_FOUND') || readError.status === 400) {
+        console.log("📊 'Daily Stats' tab not found in the Google Sheet. Creating it...");
+        try {
+          await sheets.spreadsheets.batchUpdate({
+            spreadsheetId: sheetId,
+            requestBody: {
+              requests: [
+                {
+                  addSheet: {
+                    properties: {
+                      title: 'Daily Stats'
+                    }
+                  }
+                }
+              ]
+            }
+          });
+          
+          const headers = ['post_id', 'platform', 'content_type', 'campaign_tag', 'reach', 'impressions', 'likes', 'comments', 'shares', 'saves', 'data_source', 'recorded_at'];
+          await sheets.spreadsheets.values.update({
+            spreadsheetId: sheetId,
+            range: 'Daily Stats!A1:L1',
+            valueInputOption: 'RAW',
+            requestBody: {
+              values: [headers]
+            }
+          });
+          
+          existingRows = [headers];
+          console.log("✅ Created 'Daily Stats' tab with default headers.");
+        } catch (createError) {
+          console.error("❌ Failed to automatically create 'Daily Stats' tab:", createError.message);
+          throw createError;
+        }
+      } else {
+        throw readError;
+      }
+    }
     const headers = existingRows[0] || [];
     
     // Find column index for post_id and recorded_at
