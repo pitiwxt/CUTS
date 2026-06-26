@@ -16,6 +16,22 @@ Thumbs.db
 # Temporary page previews
 page-*.png
 
+# Old LaTeX document versions (keep only v4 WithPrototype)
+Inno_Four_v2.tex
+Inno_โฟร์_2*.tex
+Inno_โฟร์_2*.pdf
+Inno_โฟร์_2*.docx
+Inno_โฟร์_3*.tex
+Inno_โฟร์_3*.pdf
+Inno_โฟร์_3*.docx
+edit.tex
+edit.pdf
+
+# Diagram source files (compiled into main doc)
+diag_*.tex
+diag_*.pdf
+prototype-screenshots/README.txt
+
 # Credentials & Deployments
 service_account.json
 .vercel/
