@@ -18,18 +18,19 @@ page-*.png
 
 # Old LaTeX document versions (keep only v4 WithPrototype)
 Inno_Four_v2.tex
-Inno_โฟร์_2*.tex
-Inno_โฟร์_2*.pdf
-Inno_โฟร์_2*.docx
-Inno_โฟร์_3*.tex
-Inno_โฟร์_3*.pdf
-Inno_โฟร์_3*.docx
+Inno_โฟร์_2*
+Inno_โฟร์_3*
 edit.tex
 edit.pdf
 
 # Diagram source files (compiled into main doc)
 diag_*.tex
 diag_*.pdf
+
+# Working/planning docs
+club_os_full_implementation.md
+CLUB_OS_PRESENTATION_PLAN.md
+raplace-diagram/
 prototype-screenshots/README.txt
 
 # Credentials & Deployments
