@@ -33,6 +33,11 @@ CLUB_OS_PRESENTATION_PLAN.md
 raplace-diagram/
 prototype-screenshots/README.txt
 
+# Implementation/planning markdown docs
+zocial_tracker_implementation_guide.md
+zocial_tracker_noapi_guide.md
+zocial_tracker_redesign_brief.md
+
 # Credentials & Deployments
 service_account.json
 .vercel/

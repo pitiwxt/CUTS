@@ -20,11 +20,12 @@ import {
   SHEET_URL,
 } from '../lib/data';
 import { runPipelineSimulation, PipelineStep } from '../lib/pipeline';
-import { Bell, RefreshCw, ExternalLink } from 'lucide-react';
+import { Bell, RefreshCw, ExternalLink, Menu } from 'lucide-react';
 
 export default function Home() {
   const [currentTab, setCurrentTab] = useState('overview');
   const [module, setModule] = useState<'home' | 'zocial' | 'ocrchat'>('home');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Data states
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
@@ -205,30 +206,48 @@ export default function Home() {
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
       {/* Left Sidebar */}
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} module={module} setModule={setModule} />
+      <Sidebar
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        module={module}
+        setModule={setModule}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       {/* Main Content Area */}
-      <div className="flex-1 pl-64 flex flex-col">
+      <div className="flex-1 md:pl-64 flex flex-col min-w-0">
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between sticky top-0 z-20">
-          <h2 className="text-lg font-bold text-slate-900">{getSectionTitle()}</h2>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg">
+        <header className="h-14 md:h-16 bg-white border-b border-slate-200 px-4 md:px-8 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex-shrink-0"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu size={18} />
+            </button>
+            <h2 className="text-sm md:text-lg font-bold text-slate-900 truncate">{getSectionTitle()}</h2>
+          </div>
+          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
+            {/* Sync badge — hidden on very small screens */}
+            <span className="hidden sm:flex text-xs text-slate-500 items-center gap-1.5 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
               </span>
-              <span>Last Synced: {lastSynced}</span>
+              <span className="hidden md:inline">Last Synced: {lastSynced}</span>
+              <span className="md:hidden">{lastSynced}</span>
             </span>
             <a
               href={SHEET_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 border border-green-300 text-green-700 text-xs font-medium transition-all"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-100 border border-green-300 text-green-700 text-xs font-medium transition-all"
               title="Open Google Sheet"
             >
               <ExternalLink size={13} />
-              View Sheet
+              <span className="hidden md:inline">View Sheet</span>
             </a>
             <button
               onClick={loadData}
@@ -247,7 +266,7 @@ export default function Home() {
         </header>
 
         {/* Content Body */}
-        <main className="flex-grow p-8 space-y-6">
+        <main className="flex-grow p-4 md:p-8 space-y-6">
 
           {/* HOME MODULE SELECTOR */}
           {module === 'home' && (
@@ -261,7 +280,7 @@ export default function Home() {
                     onError={e => { (e.target as HTMLImageElement).style.display='none'; }}
                   />
                 </div>
-                <h1 className="text-4xl font-bold text-slate-900">Club OS</h1>
+                <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Club OS</h1>
                 <p className="text-slate-500 text-base">ระบบจัดการ Marketing + Finance ของ CUTS</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
